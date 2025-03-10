@@ -1,0 +1,85 @@
+/* General Page Styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+/* Navigation Bar */
+nav {
+    background-color: #222;
+    padding: 15px;
+}
+
+nav h1 {
+    display: inline;
+    color: white;
+    margin-right: 20px;
+}
+
+nav ul {
+    display: inline;
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin-right: 15px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* Sections */
+section {
+    padding: 20px;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Clickable Car List */
+#carList ul,
+#specsList ul {
+    list-style: none;
+    padding: 0;
+}
+
+#carList li,
+#specsList li {
+    cursor: pointer;
+    color: #007bff;
+    text-decoration: underline;
+    margin: 5px 0;
+}
+
+#carList li:hover,
+#specsList li:hover {
+    color: #0056b3;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #222;
+    color: white;
+    margin-top: 20px;
+}

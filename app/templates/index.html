@@ -6,7 +6,9 @@
 	<title>Karz.co | Home</title>
 	<meta name="description" content="Connect with fellow car enthusiasts, discover detailed car specs and reviews, and explore the world of automobiles.">
 	<meta name="keywords" content="car reviews, car ratings, car specifications, car comparisons, automotive community">
-	<link rel="stylesheet" href="styles.css"> </head>
+	<link rel="stylesheet" href="../static/styles.css">
+	<script defer src="../static/script.js"></script>
+</head>
 <body>
 	<header>
 		<nav>
@@ -14,6 +16,8 @@
 			<ul>
 				<li><a href="#">Home</a></li>
 				<li><a href="#">Reviews</a></li>
+				<li><a href="car_list.html?type=explore">Explore Cars</a></li>
+				<li><a href="car_list.html?type=specs">View Specs</a></li>
 				<li><a href="#">Specs</a></li>
 				<li><a href="#">Community</a></li>
 				<li><a href="#">Login/Sign Up</a></li>
@@ -24,17 +28,13 @@
 		<section class="hero">
 			<h2>Welcome to Karz.co</h2>
 			<p>Your trusted source for car reviews, ratings, and information.</p>
-			<button>Explore Cars</button>
-		</section>
-		<section class="featured-reviews">
-			<h3>Featured Reviews</h3>
-			<div class="review-grid">
-				</div>
+			<button onclick="goToCarList('explore')">Explore Cars</button>
 		</section>
 		<section class="car-specs">
 			<h3>Car Specs</h3>
 			<p>Explore detailed specifications for your favorite car models.</p>
-			<button>View Specs</button>
+			<button onclick="window.location.href='car_list.html?type=specs'">View Specs</button>
+			<div id="specsList"></div>
 		</section>
 		<section class="community">
 			<h3>Join Our Community</h3>

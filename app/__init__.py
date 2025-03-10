@@ -14,7 +14,6 @@ db = SQLAlchemy(app)
 CAR_DATA_FILE = "app/Database/all-vehicles-model@public.csv"
 def load_car_data():
     car_data = pd.read_csv(CAR_DATA_FILE, delimiter=";")
-    print("Sample Car IDs", car_data['ID'].head(10))
     return car_data
 
 car_data = load_car_data()
@@ -33,6 +32,14 @@ with app.app_context():
 @app.route("/")
 def home():
     return render_template("index.html")
+
+# Route to get all cars
+@app.route("/get_all_cars", methods=["GET"])
+def get_all_cars():
+    # Sort the cars alphabetically and year in descending order
+    sorted_car_data = car_data[['ID', 'Make', 'Model', 'Year']].sort_values(by=['Make', 'Model', 'Year'], ascending = [True, True, False])
+    car_list = sorted_car_data.to_dict(orient='records')
+    return jsonify(car_list)
 
 # Route to get car details from CSV
 @app.route("/get_car/<int:car_id>", methods = ["GET"])
@@ -73,6 +80,17 @@ def get_reviews(car_id):
 def hello_world():
     return render_template("index.html")
 
+@app.route("/reviews.html")
+def reviews():
+    return render_template("reviews.html")
+
+@app.route("/car_list.html")
+def car_list():
+    return render_template("car_list.html")
+
+@app.route("/specs.html")
+def specs():
+    return render_template("specs.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
