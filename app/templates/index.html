@@ -1,49 +1,135 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Karz.co | Home</title>
-	<meta name="description" content="Connect with fellow car enthusiasts, discover detailed car specs and reviews, and explore the world of automobiles.">
-	<meta name="keywords" content="car reviews, car ratings, car specifications, car comparisons, automotive community">
-	<link rel="stylesheet" href="../static/styles.css">
-	<script defer src="../static/script.js"></script>
-</head>
-<body>
-	<header>
-		<nav>
-			<h1>Karz.co</h1>
-			<ul>
-				<li><a href="#">Home</a></li>
-				<li><a href="#">Reviews</a></li>
-				<li><a href="car_list.html?type=explore">Explore Cars</a></li>
-				<li><a href="car_list.html?type=specs">View Specs</a></li>
-				<li><a href="#">Specs</a></li>
-				<li><a href="#">Community</a></li>
-				<li><a href="#">Login/Sign Up</a></li>
-			</ul>
-		</nav>
-	</header>
-	<main>
-		<section class="hero">
-			<h2>Welcome to Karz.co</h2>
-			<p>Your trusted source for car reviews, ratings, and information.</p>
-			<button onclick="goToCarList('explore')">Explore Cars</button>
-		</section>
-		<section class="car-specs">
-			<h3>Car Specs</h3>
-			<p>Explore detailed specifications for your favorite car models.</p>
-			<button onclick="window.location.href='car_list.html?type=specs'">View Specs</button>
-			<div id="specsList"></div>
-		</section>
-		<section class="community">
-			<h3>Join Our Community</h3>
-			<p>Connect with car enthusiasts, share your thoughts, and ask questions.</p>
-			<button>Join Now</button>
-		</section>
-	</main>
-	<footer>
-		<p>&copy; 2025 Karz.co</p>
-	</footer>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Partial height fixed background -->
+<div class="absolute inset-x-0 top-0 h-1/4 md:h-1/2 -z-10">
+	<img src="static/bg.png" alt="Background" class="w-full h-full object-cover">
+	<div class="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent"></div>
+</div>
+
+<!-- Hero Section with Carousel -->
+<section class="pt-[25vh] md:pt-[50vh] px-4 py-12 overflow-y-auto">
+	<div class="max-w-7xl mx-auto">
+		<!-- Carousel Container -->
+		<div class="relative overflow-hidden rounded-xl shadow-lg bg-gray-100 h-96">
+			<!-- Carousel Slides -->
+			<div id="carousel" class="h-full flex transition-transform duration-500 ease-in-out">
+				<!-- Loading placeholder -->
+				<div class="min-w-full flex items-center justify-center">
+					<p class="text-gray-600">Loading cars...</p>
+				</div>
+			</div>
+
+			<!-- Navigation Arrows -->
+			<button id="prevBtn"
+				class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-purple-600 p-2 rounded-full shadow-md z-10">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+					stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+				</svg>
+			</button>
+			<button id="nextBtn"
+				class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-purple-600 p-2 rounded-full shadow-md z-10">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+					stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+				</svg>
+			</button>
+		</div>
+	</div>
+</section>
+
+
+
+<!-- JavaScript for Carousel -->
+<script>
+	document.addEventListener('DOMContentLoaded', async function () {
+		const carousel = document.getElementById('carousel');
+		const prevBtn = document.getElementById('prevBtn');
+		const nextBtn = document.getElementById('nextBtn');
+
+		try {
+			// Fetch car data asynchronously
+			const carIds = [47031, 43783, 47512];
+			const carPromises = carIds.map(id => fetchCar(id));
+			const cars = await Promise.all(carPromises);
+
+			// Clear loading placeholder
+			carousel.innerHTML = '';
+
+			// Create carousel slides
+			cars.forEach((car) => {
+				const slide = document.createElement('div');
+				slide.className = 'min-w-full h-full flex flex-col md:flex-row items-center justify-center p-8';
+				slide.innerHTML = `
+		<div class="md:w-1/2 flex justify-center h-full">
+			<img src="static/default_car.png"
+				alt="${car.Make} ${car.Model}" 
+				class="h-full w-full object-cover rounded-lg shadow-md">
+		</div>
+		<div class="md:w-1/2 mt-6 md:mt-0 md:pl-12">
+		  <h2 class="text-3xl font-bold text-gray-900">${car.Make} ${car.Model}</h2>
+		  <p class="text-xl text-purple-600 mt-2">${car.Price ? '$' + car.Price.toLocaleString() : 'Price not available'}</p>
+		  <p class="text-gray-600 mt-4">Year: ${car.Year || 'Unknown'}</p>
+		  <button class="mt-6 bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors">
+			View Details
+		  </button>
+		</div>
+	  `;
+				carousel.appendChild(slide);
+			});
+
+			let currentIndex = 0;
+			const slides = document.querySelectorAll('#carousel > div');
+			const totalSlides = slides.length;
+
+			function updateCarousel() {
+				carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
+			}
+
+			// Navigation
+			nextBtn.addEventListener('click', () => {
+				currentIndex = (currentIndex + 1) % totalSlides;
+				updateCarousel();
+			});
+
+			prevBtn.addEventListener('click', () => {
+				currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+				updateCarousel();
+			});
+
+			// Auto-advance every 5 seconds
+			let interval = setInterval(() => {
+				currentIndex = (currentIndex + 1) % totalSlides;
+				updateCarousel();
+			}, 5000);
+
+			// Pause on hover
+			carousel.parentElement.addEventListener('mouseenter', () => {
+				clearInterval(interval);
+			});
+
+			carousel.parentElement.addEventListener('mouseleave', () => {
+				interval = setInterval(() => {
+					currentIndex = (currentIndex + 1) % totalSlides;
+					updateCarousel();
+				}, 5000);
+			});
+
+			// Initialize
+			updateCarousel();
+
+		} catch (error) {
+			console.error('Error loading carousel data:', error);
+			carousel.innerHTML = `
+	  <div class="min-w-full flex items-center justify-center">
+		<p class="text-red-500">Error loading car data. Please try again later.</p>
+	  </div>
+	`;
+		}
+	});
+</script>
+
+<!-- Link to your existing JavaScript -->
+<script src="static/fetch.js"></script>
+{% endblock %}

@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+	<!-- Search Bar -->
+	<div class="mb-8 px-4"> <!-- Added px-4 for padding -->
+		<div class="relative w-full mx-auto"> <!-- Changed max-w-md to w-full -->
+			<input type="text" id="searchInput" placeholder="Search cars (make, model, year...)"
+				class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600">
+			<button id="clearSearch"
+				class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 hidden">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+					<path fill-rule="evenodd"
+						d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+						clip-rule="evenodd" />
+				</svg>
+			</button>
+		</div>
+	</div>
+
+	<h1 id="pageTitle" class="text-3xl font-bold text-purple-600 mb-8">All Cars</h1>
+
+	<!-- Car List Container -->
+	<div id="carList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+		<!-- Cars will be loaded here -->
+	</div>
+
+	<!-- Pagination Controls -->
+<div class="flex flex-col sm:flex-row justify-between items-center mt-8 gap-4">	
+	<div class="flex items-center gap-2">
+			<button id="firstPage"
+				class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-lg disabled:opacity-50" disabled>
+				&laquo;
+			</button>
+			<button id="prevPage"
+				class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-lg disabled:opacity-50" disabled>
+				&lsaquo;
+			</button>
+		</div>
+
+		<div class="flex items-center gap-2">
+			<span class="text-gray-700">Page</span>
+			<input type="number" id="pageInput" min="1" value="1"
+				class="w-16 text-center border border-gray-300 rounded-lg px-2 py-1">
+			<span id="totalPages" class="text-gray-700">of 1</span>
+		</div>
+
+		<div class="flex items-center gap-2">
+			<button id="nextPage"
+				class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-lg disabled:opacity-50">
+				&rsaquo;
+			</button>
+			<button id="lastPage"
+				class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-lg disabled:opacity-50">
+				&raquo;
+			</button>
+		</div>
+	</div>
+</div>
+
+<script>
+	// Fuzzy Search Implementation
+	function fuzzySearch(query, target, options = {}) {
+		const { caseSensitive = false, ignoreSpaces = false } = options;
+
+		if (!query || !target) return 0;
+
+		let normalizedQuery = query;
+		let normalizedTarget = target;
+
+		if (!caseSensitive) {
+			normalizedQuery = normalizedQuery.toLowerCase();
+			normalizedTarget = normalizedTarget.toLowerCase();
+		}
+
+		if (ignoreSpaces) {
+			normalizedQuery = normalizedQuery.replace(/\s+/g, '');
+			normalizedTarget = normalizedTarget.replace(/\s+/g, '');
+		}
+
+		if (normalizedQuery === normalizedTarget) return 1;
+		if (normalizedTarget.includes(normalizedQuery)) {
+			return 0.9 + (normalizedQuery.length / normalizedTarget.length) * 0.1;
+		}
+
+		let queryIndex = 0;
+		let targetIndex = 0;
+		let matches = 0;
+		let gaps = 0;
+		let lastMatchIndex = -1;
+
+		while (queryIndex < normalizedQuery.length && targetIndex < normalizedTarget.length) {
+			if (normalizedQuery[queryIndex] === normalizedTarget[targetIndex]) {
+				matches++;
+				if (lastMatchIndex >= 0 && targetIndex > lastMatchIndex + 1) {
+					gaps += targetIndex - lastMatchIndex - 1;
+				}
+				lastMatchIndex = targetIndex;
+				queryIndex++;
+			}
+			targetIndex++;
+		}
+
+		if (matches === 0) return 0;
+
+		const matchRatio = matches / normalizedQuery.length;
+		const sequenceRatio = matches / (matches + gaps);
+		const coverageRatio = matches / normalizedTarget.length;
+
+		return (matchRatio * 0.5) + (sequenceRatio * 0.3) + (coverageRatio * 0.2);
+	}
+
+	function fuzzySearchItems(items, query, options = {}) {
+		const { key = null, threshold = 0.3, ...searchOptions } = options;
+		if (!query) return items.slice();
+
+		return items
+			.map(item => {
+				let searchString;
+				if (typeof key === 'function') {
+					searchString = key(item);
+				} else if (key && typeof item === 'object' && key in item) {
+					searchString = item[key];
+				} else {
+					searchString = String(item);
+				}
+				const score = fuzzySearch(query, searchString, searchOptions);
+				return { item, score };
+			})
+			.filter(({ score }) => score >= threshold)
+			.sort((a, b) => b.score - a.score)
+			.map(({ item }) => item);
+	}
+
+	document.addEventListener('DOMContentLoaded', async function () {
+		const searchInput = document.getElementById('searchInput');
+		const clearSearch = document.getElementById('clearSearch');
+		const carList = document.getElementById('carList');
+		const firstBtn = document.getElementById('firstPage');
+		const prevBtn = document.getElementById('prevPage');
+		const nextBtn = document.getElementById('nextPage');
+		const lastBtn = document.getElementById('lastPage');
+		const pageInput = document.getElementById('pageInput');
+		const totalPagesSpan = document.getElementById('totalPages');
+
+		let currentPage = 1;
+		const carsPerPage = 6;
+		let allCars = [];
+		let filteredCars = [];
+		let totalPages = 1;
+
+		// Fetch all cars
+		async function loadCars() {
+			try {
+				allCars = await getAllCars();
+				filteredCars = allCars.slice();
+				totalPages = Math.ceil(filteredCars.length / carsPerPage);
+				totalPagesSpan.textContent = `of ${totalPages}`;
+				renderCars();
+			} catch (error) {
+				console.error('Error loading cars:', error);
+				carList.innerHTML = '<p class="text-red-500 col-span-full">Error loading cars. Please try again later.</p>';
+			}
+		}
+
+		// Render cars for current page
+		function renderCars() {
+			const startIndex = (currentPage - 1) * carsPerPage;
+			const endIndex = startIndex + carsPerPage;
+			const carsToShow = filteredCars.slice(startIndex, endIndex);
+
+			carList.innerHTML = carsToShow.length > 0 ? carsToShow.map(car => `
+      <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+        <div class="h-48 bg-gray-200 flex items-center justify-center">
+          <img src="${car.Image ? `/static/uploads/${car.Image}` : '/static/default_car.png'}" 
+               alt="${car.Make} ${car.Model}" 
+               class="h-full w-full object-cover"
+               onerror="this.src='/static/default_car.png'">
+        </div>
+        <div class="p-4">
+          <h3 class="text-xl font-bold text-gray-900">${car.Make} ${car.Model}</h3>
+          <p class="text-purple-600 font-semibold">$${car.Price ? car.Price.toLocaleString() : 'N/A'}</p>
+          <p class="text-gray-600">Year: ${car.Year || 'Unknown'}</p>
+          <a href="/specs.html?id=${car.ID}" 
+             class="mt-4 inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+            View Details
+          </a>
+        </div>
+      </div>
+    `).join('') : '<p class="col-span-full text-center py-12 text-gray-500">No cars found matching your search</p>';
+
+			pageInput.value = currentPage;
+			firstBtn.disabled = currentPage === 1;
+			prevBtn.disabled = currentPage === 1;
+			nextBtn.disabled = currentPage === totalPages;
+			lastBtn.disabled = currentPage === totalPages;
+		}
+
+		function goToPage(page) {
+			page = Math.max(1, Math.min(page, totalPages));
+			if (page !== currentPage) {
+				currentPage = page;
+				renderCars();
+			}
+		}
+
+		function performSearch(query) {
+			const pageTitle = document.getElementById('pageTitle');
+			if (query.trim() !== '') {
+				pageTitle.textContent = `Search Results for "${query}"`;
+			} else {
+				pageTitle.textContent = 'All Cars';
+			}
+
+			filteredCars = query.trim() === '' ?
+				allCars.slice() :
+				fuzzySearchItems(allCars, query, {
+					key: item => `${item.Make} ${item.Model} ${item.Year}`,
+					threshold: 0.3,
+					ignoreSpaces: true
+				});
+
+			currentPage = 1;
+			totalPages = Math.ceil(filteredCars.length / carsPerPage);
+			totalPagesSpan.textContent = `of ${totalPages}`;
+			renderCars();
+		}
+
+		// Event listeners
+		firstBtn.addEventListener('click', () => goToPage(1));
+		prevBtn.addEventListener('click', () => goToPage(currentPage - 1));
+		nextBtn.addEventListener('click', () => goToPage(currentPage + 1));
+		lastBtn.addEventListener('click', () => goToPage(totalPages));
+
+		pageInput.addEventListener('change', (e) => {
+			const page = parseInt(e.target.value);
+			if (!isNaN(page)) goToPage(page);
+		});
+
+		searchInput.addEventListener('input', (e) => {
+			performSearch(e.target.value);
+			clearSearch.classList.toggle('hidden', e.target.value === '');
+		});
+
+		clearSearch.addEventListener('click', () => {
+			searchInput.value = '';
+			document.getElementById('pageTitle').textContent = 'All Cars';
+			performSearch('');
+			clearSearch.classList.add('hidden');
+			searchInput.focus();
+		});
+
+		// Initial load
+		loadCars();
+	});
+</script>
+
+<!-- Link to your existing JavaScript -->
+<script src="static/fetch.js"></script>
+{% endblock %}

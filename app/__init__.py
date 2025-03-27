@@ -31,7 +31,7 @@ with app.app_context():
 
 @app.route("/")
 def home():
-	return render_template("index.html")
+	return render_template("index.html", t="Home")
 
 # Route to get all cars
 @app.route("/get_all_cars", methods=["GET"])
@@ -97,10 +97,6 @@ def get_reviews(car_id):
 	]
 	return jsonify(review_list)
 
-@app.route("/")
-def hello_world():
-	return render_template("index.html")
-
 @app.route("/reviews.html")
 def reviews():
 	return render_template("reviews.html")
@@ -113,5 +109,14 @@ def car_list():
 def specs():
 	return render_template("specs.html")
 
+@app.route("/view")
+def view():
+	return render_template("view.html", t="View Inventory")
+
+@app.route("/register")
+def register():
+	return render_template("register.html", t="Register")
+
 if __name__ == '__main__':
+	app.config['TEMPLATES_AUTO_RELOAD'] = True
 	app.run(debug=True)
