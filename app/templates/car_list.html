@@ -1,21 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car List</title>
-    <link rel="stylesheet" href="../static/styles.css">
-    <script defer src="../static/script.js"></script>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Car List</title>
+	<link rel="stylesheet" href="../static/styles.css">
+	<script defer src="../static/script.js"></script>
 </head>
 <body>
 <header>
-    <h1>Car List</h1>
-    <button id="backToHome">Back to Home</button>
+	<h1>Car List</h1>
+
+	<input type="text" id="search-input" placeholder="Search by Make, Model, or Year">
+	<ul id="car-results"></ul>
+
+	<button id="backToHome">Back to Home</button>
 </header>
 <main>
     <h2 id="pageTitle"></h2>
-    <h2 id="carList"></h2>
+    
+    <!-- Wrap the full car list in a div -->
+    <div id="full-car-list">
+        <h2>All Cars</h2>
+        <ul id="carList"></ul>
+    </div>
 </main>
+
+<script>
+    document.getElementById("search-input").addEventListener("keydown", async function(event) {
+        if (event.key === "Enter") {
+            let query = this.value.trim();
+            if (query === "") return;
+
+            let response = await fetch(`/search_cars?query=${query}`);
+            let cars = await response.json();
+
+            let resultsContainer = document.getElementById("car-results");
+            let fullCarList = document.getElementById("full-car-list");
+
+            // Hide the full car list when searching
+            if (fullCarList) fullCarList.style.display = "none";
+
+            resultsContainer.innerHTML = ""; // Clear previous results
+
+            if (cars.length === 0) {
+                resultsContainer.innerHTML = "<p>No cars found</p>";
+                return;
+            }
+
+            cars.forEach(car => {
+                let link = document.createElement("a");
+                link.href = `/get_car/${car.ID}`;
+                link.textContent = `${car.Make} ${car.Model} (${car.Year})`;
+                link.style.display = "block"; // Makes each link appear on a new line
+                link.style.margin = "5px 0";  // Adds some spacing
+                resultsContainer.appendChild(link);
+            });
+        }
+    });
+</script>
+
 </body>
 </html>
-
