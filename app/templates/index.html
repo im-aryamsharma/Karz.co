@@ -2,16 +2,16 @@
 
 {% block content %}
 <!-- Partial height fixed background -->
-<div class="absolute inset-x-0 top-0 h-1/4 md:h-1/2 -z-10">
+<div class="fixed inset-x-0 top-0 h-1/4 md:h-1/2 -z-10">
 	<img src="static/bg.png" alt="Background" class="w-full h-full object-cover">
 	<div class="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent"></div>
 </div>
 
 <!-- Hero Section with Carousel -->
-<section class="pt-[25vh] md:pt-[50vh] px-4 py-12 overflow-y-auto">
+<section class="pt-[25vh] md:pt-[50vh] px-4 relative">
 	<div class="max-w-7xl mx-auto">
-		<!-- Carousel Container -->
-		<div class="relative overflow-hidden rounded-xl shadow-lg bg-gray-100 h-96">
+		<!-- Carousel Container - Changed bg-gray-100 to bg-white -->
+		<div class="relative overflow-hidden rounded-xl shadow-lg bg-white h-96">
 			<!-- Carousel Slides -->
 			<div id="carousel" class="h-full flex transition-transform duration-500 ease-in-out">
 				<!-- Loading placeholder -->
