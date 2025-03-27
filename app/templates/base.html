@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="icon" href="static/pistons.svg" type="image/svg+xml">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Karz.co - {{t}}</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+	<!-- Navbar -->
+	<nav class="bg-white shadow-lg">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="flex justify-between h-16">
+				<!-- Logo -->
+				<div class="flex-shrink-0 flex items-center group">
+					<a href="/" class="flex items-center space-x-2">
+						<!-- Animated SVG Pistons -->
+						<div class="relative h-9 w-9">
+							<img src="static/pistons.svg"
+								class="h-full w-full text-purple-600 transition-all duration-500 group-hover:rotate-12">
+							<div
+								class="absolute inset-0 rounded-full bg-purple-100 opacity-0 group-hover:opacity-100 group-hover:scale-125 transition-all duration-300 mix-blend-multiply">
+							</div>
+						</div>
+				
+						<!-- Text with gradient and underline animation -->
+						<span class="text-2xl font-bold">
+							<span class="bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
+								Karz
+							</span>
+							<span class="text-purple-400 relative">
+								.co
+								<span
+									class="absolute left-0 bottom-0 w-full h-0.5 bg-purple-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+							</span>
+						</span>
+					</a>
+				</div>
+	
+				<!-- Desktop Menu -->
+				<div class="hidden md:ml-6 md:flex md:items-center md:space-x-8">
+					<a href="/"
+						class="text-gray-900 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Home</a>
+					<a href="/view"
+						class="text-gray-900 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300">View
+						Inventory</a>
+					<a href="/register"
+						class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-300 shadow-lg hover:shadow-purple-200">Register</a>
+				</div>
+	</nav>
+	{% block content %}{% endblock %}
+</body>
+</html>
