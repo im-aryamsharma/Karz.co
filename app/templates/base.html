@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<link rel="icon" href="static/pistons.svg" type="image/svg+xml">
 	<meta charset="UTF-8">
@@ -7,6 +8,7 @@
 	<title>Karz.co - {{t}}</title>
 	<script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body>
 	<!-- Navbar -->
 	<nav class="bg-white shadow-lg">
@@ -23,7 +25,7 @@
 								class="absolute inset-0 rounded-full bg-purple-100 opacity-0 group-hover:opacity-100 group-hover:scale-125 transition-all duration-300 mix-blend-multiply">
 							</div>
 						</div>
-				
+
 						<!-- Text with gradient and underline animation -->
 						<span class="text-2xl font-bold">
 							<span class="bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
@@ -37,7 +39,7 @@
 						</span>
 					</a>
 				</div>
-	
+
 				<!-- Desktop Menu -->
 				<div class="hidden md:ml-6 md:flex md:items-center md:space-x-8">
 					<a href="/"
@@ -45,10 +47,124 @@
 					<a href="/view"
 						class="text-gray-900 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300">View
 						Inventory</a>
-					<a href="/register"
-						class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-300 shadow-lg hover:shadow-purple-200">Register</a>
+
+					<!-- Dynamic Menu Based on Auth Status -->
+					<div id="authStatus" class="flex items-center space-x-4">
+						<!-- Default state (loading) -->
+						<div class="animate-pulse h-8 w-24 bg-gray-200 rounded"></div>
+					</div>
 				</div>
+
+				<!-- Mobile menu button -->
+				<div class="md:hidden flex items-center">
+					<button id="mobileMenuButton" type="button"
+						class="text-gray-500 hover:text-purple-600 focus:outline-none">
+						<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M4 6h16M4 12h16M4 18h16"></path>
+						</svg>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Mobile Menu (Hidden by default) -->
+		<div id="mobileMenu" class="md:hidden hidden">
+			<div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+				<a href="/"
+					class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600">Home</a>
+				<a href="/view"
+					class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600">View
+					Inventory</a>
+				<div id="mobileAuthStatus" class="pt-4 pb-3 border-t border-gray-200">
+					<!-- Mobile auth status will be populated here -->
+				</div>
+			</div>
+		</div>
 	</nav>
+
 	{% block content %}{% endblock %}
+
+	<script>
+		// Check auth status and update UI
+		async function checkAuthStatus() {
+			try {
+				const response = await fetch('/api/check-auth');
+				const data = await response.json();
+				updateAuthUI(data.authenticated, data.username || '');
+			} catch (error) {
+				console.error('Error checking auth status:', error);
+				updateAuthUI(false); // Fallback to logged out state
+			}
+		}
+
+		// Update UI based on auth status
+		function updateAuthUI(isAuthenticated, username = '') {
+			const authStatus = document.getElementById('authStatus');
+			const mobileAuthStatus = document.getElementById('mobileAuthStatus');
+
+			if (isAuthenticated) {
+				// Logged in state (unchanged)
+				authStatus.innerHTML = `
+				<span class="text-sm text-gray-500">Hi, ${username}</span>
+				<button onclick="handleLogout()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-300">
+					Logout
+				</button>
+			`;
+
+				mobileAuthStatus.innerHTML = `
+				<div class="px-3 py-2">
+					<p class="text-sm text-gray-500">Logged in as ${username}</p>
+					<button onclick="handleLogout()" class="mt-2 block px-3 py-2 rounded-md text-base font-medium text-purple-600 hover:text-purple-800">
+						Logout
+					</button>
+				</div>
+			`;
+			} else {
+				// Simplified logged out state - single button
+				authStatus.innerHTML = `
+				<a href="/register" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-300">
+					Sign In
+				</a>
+			`;
+
+				mobileAuthStatus.innerHTML = `
+				<a href="/register" class="block px-3 py-2 rounded-md text-base font-medium text-purple-600 hover:text-purple-800">
+					Sign In
+				</a>
+			`;
+			}
+		}
+
+		// Keep the same logout handler
+		async function handleLogout() {
+			try {
+				const response = await fetch('/api/logout', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				});
+
+				if (response.ok) {
+					window.location.reload();
+				} else {
+					console.error('Logout failed');
+				}
+			} catch (error) {
+				console.error('Error during logout:', error);
+			}
+		}
+
+		// Toggle mobile menu
+		document.getElementById('mobileMenuButton').addEventListener('click', function () {
+			const mobileMenu = document.getElementById('mobileMenu');
+			mobileMenu.classList.toggle('hidden');
+		});
+
+		// Check auth status when page loads
+		document.addEventListener('DOMContentLoaded', checkAuthStatus);
+	</script>
 </body>
+
 </html>

@@ -2,16 +2,16 @@
 
 {% block content %}
 <!-- Partial height fixed background -->
-<div class="absolute inset-x-0 top-0 h-1/4 md:h-1/2 -z-10">
+<div class="fixed inset-x-0 top-0 h-1/4 md:h-1/2 -z-10">
 	<img src="static/bg.png" alt="Background" class="w-full h-full object-cover">
 	<div class="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent"></div>
 </div>
 
 <!-- Hero Section with Carousel -->
-<section class="pt-[25vh] md:pt-[50vh] px-4 py-12 overflow-y-auto">
+<section class="pt-[25vh] md:pt-[50vh] px-4 relative">
 	<div class="max-w-7xl mx-auto">
-		<!-- Carousel Container -->
-		<div class="relative overflow-hidden rounded-xl shadow-lg bg-gray-100 h-96">
+		<!-- Carousel Container - Changed bg-gray-100 to bg-white -->
+		<div class="relative overflow-hidden rounded-xl shadow-lg bg-white h-96">
 			<!-- Carousel Slides -->
 			<div id="carousel" class="h-full flex transition-transform duration-500 ease-in-out">
 				<!-- Loading placeholder -->
@@ -48,84 +48,97 @@
 		const prevBtn = document.getElementById('prevBtn');
 		const nextBtn = document.getElementById('nextBtn');
 
+		// Define the specific car IDs you want to show in the carousel
+		const featuredCarIds = [1, 2, 9]; // Example IDs - replace with your desired IDs
+
 		try {
 			// Fetch car data asynchronously
-			const carIds = [47031, 43783, 47512];
-			const carPromises = carIds.map(id => fetchCar(id));
-			const cars = await Promise.all(carPromises);
+			const res = await fetch("/get_all_cars");
+			const allCars = await res.json();
+
+			// Filter cars to only include those with matching IDs
+			const selectedCars = allCars.filter(car => featuredCarIds.includes(car.id));
 
 			// Clear loading placeholder
 			carousel.innerHTML = '';
 
-			// Create carousel slides
-			cars.forEach((car) => {
+			// Create carousel slides ONLY for selected cars
+			selectedCars.forEach((car) => {
 				const slide = document.createElement('div');
 				slide.className = 'min-w-full h-full flex flex-col md:flex-row items-center justify-center p-8';
 				slide.innerHTML = `
-		<div class="md:w-1/2 flex justify-center h-full">
-			<img src="static/default_car.png"
-				alt="${car.Make} ${car.Model}" 
-				class="h-full w-full object-cover rounded-lg shadow-md">
-		</div>
-		<div class="md:w-1/2 mt-6 md:mt-0 md:pl-12">
-		  <h2 class="text-3xl font-bold text-gray-900">${car.Make} ${car.Model}</h2>
-		  <p class="text-xl text-purple-600 mt-2">${car.Price ? '$' + car.Price.toLocaleString() : 'Price not available'}</p>
-		  <p class="text-gray-600 mt-4">Year: ${car.Year || 'Unknown'}</p>
-		  <button class="mt-6 bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors">
-			View Details
-		  </button>
-		</div>
-	  `;
+                <div class="md:w-1/2 flex justify-center h-full">
+                    <img src="${car.Image || 'static/default_car.png'}"
+                        alt="${car['Company Names']} ${car['Cars Names']}"
+                        class="h-full w-full object-cover rounded-lg shadow-md">
+                </div>
+                <div class="md:w-1/2 mt-6 md:mt-0 md:pl-12">
+                    <h2 class="text-3xl font-bold text-gray-900">${car['Company Names']} ${car['Cars Names']}</h2>
+                    <p class="text-xl text-purple-600 mt-2">${car['Cars Prices'] ? car['Cars Prices'].startsWith('$') ? car['Cars Prices'] : '$' + car['Cars Prices'] : 'Price not available'}</p>
+					<a href="/specs?id=${car.id}" class="mt-6 bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors inline-block">
+						View Details
+					</a>
+                </div>
+            `;
 				carousel.appendChild(slide);
 			});
 
-			let currentIndex = 0;
-			const slides = document.querySelectorAll('#carousel > div');
-			const totalSlides = slides.length;
+			// Only proceed with carousel if we have cars to show
+			if (selectedCars.length > 0) {
+				let currentIndex = 0;
+				const slides = document.querySelectorAll('#carousel > div');
+				const totalSlides = slides.length;
 
-			function updateCarousel() {
-				carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
-			}
+				function updateCarousel() {
+					carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
+				}
 
-			// Navigation
-			nextBtn.addEventListener('click', () => {
-				currentIndex = (currentIndex + 1) % totalSlides;
-				updateCarousel();
-			});
+				// Navigation
+				nextBtn.addEventListener('click', () => {
+					currentIndex = (currentIndex + 1) % totalSlides;
+					updateCarousel();
+				});
 
-			prevBtn.addEventListener('click', () => {
-				currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
-				updateCarousel();
-			});
+				prevBtn.addEventListener('click', () => {
+					currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+					updateCarousel();
+				});
 
-			// Auto-advance every 5 seconds
-			let interval = setInterval(() => {
-				currentIndex = (currentIndex + 1) % totalSlides;
-				updateCarousel();
-			}, 5000);
-
-			// Pause on hover
-			carousel.parentElement.addEventListener('mouseenter', () => {
-				clearInterval(interval);
-			});
-
-			carousel.parentElement.addEventListener('mouseleave', () => {
-				interval = setInterval(() => {
+				// Auto-advance every 5 seconds
+				let interval = setInterval(() => {
 					currentIndex = (currentIndex + 1) % totalSlides;
 					updateCarousel();
 				}, 5000);
-			});
 
-			// Initialize
-			updateCarousel();
+				// Pause on hover
+				carousel.parentElement.addEventListener('mouseenter', () => {
+					clearInterval(interval);
+				});
+
+				carousel.parentElement.addEventListener('mouseleave', () => {
+					interval = setInterval(() => {
+						currentIndex = (currentIndex + 1) % totalSlides;
+						updateCarousel();
+					}, 5000);
+				});
+
+				// Initialize
+				updateCarousel();
+			} else {
+				carousel.innerHTML = `
+                <div class="min-w-full flex items-center justify-center">
+                    <p class="text-yellow-500">No featured cars found.</p>
+                </div>
+            `;
+			}
 
 		} catch (error) {
 			console.error('Error loading carousel data:', error);
 			carousel.innerHTML = `
-	  <div class="min-w-full flex items-center justify-center">
-		<p class="text-red-500">Error loading car data. Please try again later.</p>
-	  </div>
-	`;
+            <div class="min-w-full flex items-center justify-center">
+                <p class="text-red-500">Error loading car data. Please try again later.</p>
+            </div>
+        `;
 		}
 	});
 </script>

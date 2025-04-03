@@ -33,7 +33,7 @@ if (window.location.pathname.includes("reviews.html")) {
 }
 
 // Load car details if on specs.html
-if (window.location.pathname.includes("specs.html")) {
+if (window.location.pathname.includes("specs")) {
 	document.addEventListener("DOMContentLoaded", function () {
 		fetchCarDetails(carId);
 	});
@@ -75,7 +75,7 @@ function fetchCarList(type) {
 				carListHTML += `
 					<li>
 						<a href="${type === 'explore' ? 'reviews.html' : 'specs.html'}?id=${car.ID}&type=${type}">
-							${car.Make} ${car.Model} (${car.Year})
+							${car["Company Names"]} ${car["Cars Names"]}
 						</a>
 					</li>
 				`;
@@ -126,55 +126,80 @@ function fetchCarReviews(carId) {
 	reviewsContainer.innerHTML = uniqueReviews;
 }
 
-// Fetch car details and display
 function fetchCarDetails(carId) {
-	const carDetailsContainer = document.getElementById("carDetails");
-	if (!carDetailsContainer) {
-		console.error("Error: 'carDetails' container not found!");
-		return;
-	}
-
 	fetch(`${API_BASE}/get_car/${carId}`)
 		.then(response => {
-			if (!response.ok) {
-				throw new Error(`HTTP error! Status: ${response.status}`);
-			}
-			return response.text(); // Get raw response first
+			if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+			return response.text();
 		})
 		.then(text => {
-			console.log("Raw API Response:", text); // Debugging log
-
-			// Fix: Replace "NaN" with null to avoid JSON error
+			// Clean response and parse JSON
 			let cleanedText = text.replace(/NaN/g, "null");
-
-			return JSON.parse(cleanedText); // Convert to JSON
-		})
-		.then(car => {
-			console.log("Parsed Car Data:", car); // Debugging log
-
-			if (!car || Object.keys(car).length === 0) {
-				document.getElementById("carDetails").innerHTML = "<p>No specifications available for this car.</p>";
-				return;
-			}
-
-			document.getElementById("carTitle").textContent = `${car.Make} ${car.Model} (${car.Year})`;
-			let carDetailsHTML = "<h3>Specifications:</h3>";
-
-			Object.keys(car).forEach(key => {
-				carDetailsHTML += `<p><strong>${key}:</strong> ${car[key]}</p>`;
-			});
-
-			document.getElementById("carDetails").innerHTML = carDetailsHTML;
+			const car = JSON.parse(cleanedText);
+			renderCarDetails(car);
 		})
 		.catch(error => {
 			console.error("Error fetching car details:", error);
-			document.getElementById("carDetails").innerHTML = "<p>Error loading specifications. Please try again later.</p>";
+			showError('Error loading specifications. Please try again later.');
 		});
+}
+
+function renderCarDetails(car) {
+	if (!car || Object.keys(car).length === 0) {
+		throw new Error('No car data received');
+	}
+
+	// Set main car info
+	document.getElementById('carTitle').textContent = `${car["Company Names"]} ${car["Cars Names"]}`;
+	document.getElementById('carPrice').textContent = car["Cars Prices"] ? `${car["Cars Prices"]}` : 'Price on request';
+
+	// Set basic info
+	const basicInfo = document.getElementById('carBasicInfo');
+	basicInfo.innerHTML = `<p class="flex items-center">
+    <img src="../static/engine.svg" class="w-5 h-5 mr-1" alt="Engine Icon">
+    ${car["Engine"] || 'N/A'}
+  </p>
+  <p class="flex items-center">
+    <img src="../static/speed.svg" class="w-5 h-5 mr-1" alt="Speed Icon">0-100 km/h in ${car["Performance"] || 'N/A'}
+  </p>`;
+
+	// Set car image
+	const carImage = document.getElementById('carImage');
+	carImage.src = car["Image"] || '/static/default_car.png';
+	carImage.alt = `${car["Company Names"]} ${car["Cars Names"]}`;
+
+	// Populate specifications
+	const detailsContainer = document.getElementById('carDetails');
+	detailsContainer.innerHTML = ''; // Clear previous content
+	const importantSpecs = ["Top Speed", "Horsepower", "Torque", "Fuel Type", "CC/Battery Capacity", "Seats"];
+
+	importantSpecs.forEach(spec => {
+		if (car[spec]) {
+			detailsContainer.innerHTML += `
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <h4 class="font-medium text-gray-500">${spec}</h4>
+          <p class="text-lg font-semibold text-gray-900">${car[spec]}</p>
+        </div>
+      `;
+		}
+	});
+}
+
+function showError(message) {
+	const container = document.getElementById('carDetails') || document.createElement('div');
+	container.innerHTML = `
+    <div class="col-span-2 bg-red-50 p-4 rounded-lg text-center">
+      <p class="text-red-600 font-medium">${message}</p>
+    </div>
+  `;
+	if (!container.parentNode) {
+		document.querySelector('main').appendChild(container);
+	}
 }
 
 // Navigation Functions
 function goToCarList(type) {
-	window.location.href = `car_list.html?type=${type}`;
+	window.location.href = `view`;
 }
 
 function goToHome() {
