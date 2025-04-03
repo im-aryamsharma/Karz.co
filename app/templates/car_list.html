@@ -50,10 +50,10 @@
 
             cars.forEach(car => {
                 let link = document.createElement("a");
-                link.href = `/get_car/${car.ID}`;
-                link.textContent = `${car.Make} ${car.Model} (${car.Year})`;
-                link.style.display = "block"; // Makes each link appear on a new line
-                link.style.margin = "5px 0";  // Adds some spacing
+                link.href = `/get_car/${encodeURIComponent(car["Company Names"])}/${encodeURIComponent(car["Cars Names"])}`;
+                link.textContent = `${car["Company Names"]} ${car["Cars Names"]} - ${car["Cars Prices"]}`;
+                link.style.display = "block";
+                link.style.margin = "5px 0";
                 resultsContainer.appendChild(link);
             });
         }

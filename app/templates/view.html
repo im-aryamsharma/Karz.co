@@ -178,10 +178,10 @@
                onerror="this.src='/static/default_car.png'">
         </div>
         <div class="p-4">
-          <h3 class="text-xl font-bold text-gray-900">${car.Make} ${car.Model}</h3>
-          <p class="text-purple-600 font-semibold">$${car.Price ? car.Price.toLocaleString() : 'N/A'}</p>
+          <h3 class="text-xl font-bold text-gray-900">${car["Company Names"]} ${car["Cars Names"]}</h3>
+          <p class="text-purple-600 font-semibold">${car["Cars Prices"] ? car['Cars Prices'].startsWith('$') ? car['Cars Prices'] : '$' + car['Cars Prices'] : 'N/A'}</p>
           <p class="text-gray-600">Year: ${car.Year || 'Unknown'}</p>
-          <a href="/specs.html?id=${car.ID}" 
+          <a href="/specs.html?company=${encodeURIComponent(car['Company Names'])}&car_name=${encodeURIComponent(car['Cars Names'])}">
              class="mt-4 inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
             View Details
           </a>
