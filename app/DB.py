@@ -1,9 +1,10 @@
 # THE DATA WAS FROM
 # https://data.opendatasoft.com/explore/dataset/all-vehicles-model%40public/information/?sort=modifiedon
 import pandas as pd
+pd.__version__ 
 
-df = pd.read_csv("Database/all-vehicles-model@public.csv", delimiter=";")
-# print(df.columns)
+df = pd.read_csv("app\Database\Cars_data_2024.csv", delimiter=";")
+print(df.columns)
 
 while True:
 	make = input("Brand: ").lower()
