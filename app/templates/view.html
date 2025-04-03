@@ -169,10 +169,12 @@
 			const endIndex = startIndex + carsPerPage;
 			const carsToShow = filteredCars.slice(startIndex, endIndex);
 
+			carsToShow.map(car => console.log(car));
+
 			carList.innerHTML = carsToShow.length > 0 ? carsToShow.map(car => `
       <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
         <div class="h-48 bg-gray-200 flex items-center justify-center">
-          <img src="${car.Image ? `/static/uploads/${car.Image}` : '/static/default_car.png'}" 
+          <img src="${car.Image != "" ? car.Image : '/static/default_car.png'}" 
                alt="${car.Make} ${car.Model}" 
                class="h-full w-full object-cover"
                onerror="this.src='/static/default_car.png'">
@@ -181,8 +183,7 @@
           <h3 class="text-xl font-bold text-gray-900">${car["Company Names"]} ${car["Cars Names"]}</h3>
           <p class="text-purple-600 font-semibold">${car["Cars Prices"] ? car['Cars Prices'].startsWith('$') ? car['Cars Prices'] : '$' + car['Cars Prices'] : 'N/A'}</p>
           <p class="text-gray-600">Year: ${car.Year || 'Unknown'}</p>
-          <a href="/specs.html?company=${encodeURIComponent(car['Company Names'])}&car_name=${encodeURIComponent(car['Cars Names'])}">
-             class="mt-4 inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+          <a href="/specs?id=${car.id}" class="mt-4 inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
             View Details
           </a>
         </div>
@@ -215,7 +216,7 @@
 			filteredCars = query.trim() === '' ?
 				allCars.slice() :
 				fuzzySearchItems(allCars, query, {
-					key: item => `${item.Make} ${item.Model} ${item.Year}`,
+					key: item => `${item["Company Names"]} ${item["Cars Names"]}`,
 					threshold: 0.3,
 					ignoreSpaces: true
 				});
