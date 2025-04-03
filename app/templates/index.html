@@ -50,9 +50,11 @@
 
 		try {
 			// Fetch car data asynchronously
-			const carIds = [47031, 43783, 47512];
-			const carPromises = carIds.map(id => fetchCar(id));
-			const cars = await Promise.all(carPromises);
+			const res = await fetch("/get_all_cars");
+			const cars = await res.json();
+
+			// Show the first 3 cars in the carousel
+			const selectedCars = cars.slice(0, 3);
 
 			// Clear loading placeholder
 			carousel.innerHTML = '';
@@ -64,18 +66,17 @@
 				slide.innerHTML = `
 		<div class="md:w-1/2 flex justify-center h-full">
 			<img src="static/default_car.png"
-				alt="${car.Make} ${car.Model}" 
+				alt="${car['Company Names']} ${car['Cars Names']}"
 				class="h-full w-full object-cover rounded-lg shadow-md">
 		</div>
 		<div class="md:w-1/2 mt-6 md:mt-0 md:pl-12">
-		  <h2 class="text-3xl font-bold text-gray-900">${car.Make} ${car.Model}</h2>
-		  <p class="text-xl text-purple-600 mt-2">${car.Price ? '$' + car.Price.toLocaleString() : 'Price not available'}</p>
-		  <p class="text-gray-600 mt-4">Year: ${car.Year || 'Unknown'}</p>
-		  <button class="mt-6 bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors">
-			View Details
-		  </button>
+			<h2 class="text-3xl font-bold text-gray-900">${car['Company Names']} ${car['Cars Names']}</h2>
+			<p class="text-xl text-purple-600 mt-2">${car['Cars Prices'] ? car['Cars Prices'].startsWith('$') ? car['Cars Prices'] : '$' + car['Cars Prices'] : 'Price not available'}</p>
+			<button class="mt-6 bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors">
+				View Details
+			</button>
 		</div>
-	  `;
+	`;
 				carousel.appendChild(slide);
 			});
 
