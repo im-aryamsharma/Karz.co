@@ -184,7 +184,7 @@ def api_register():
 @app.route("/get_all_cars", methods=["GET"])
 def get_all_cars():
 	# Sort by company and car name, alphabetically
-	sorted_car_data = car_data[['id', 'Company Names', 'Cars Names', 'Cars Prices', 'Image']].sort_values(
+	sorted_car_data = car_data[['id', 'Company Names', 'Cars Names', 'Cars Prices', 'Image', 'Engine']].sort_values(
 		by=['id'],
 		ascending=[True]
 	)

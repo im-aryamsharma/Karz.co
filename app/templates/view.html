@@ -5,7 +5,7 @@
 	<!-- Search Bar -->
 	<div class="mb-8 px-4"> <!-- Added px-4 for padding -->
 		<div class="relative w-full mx-auto"> <!-- Changed max-w-md to w-full -->
-			<input type="text" id="searchInput" placeholder="Search cars (make, model, year...)"
+			<input type="text" id="searchInput" placeholder="Search cars (make, model, engine...)"
 				class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600">
 			<button id="clearSearch"
 				class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 hidden">
@@ -182,7 +182,7 @@
         <div class="p-4">
           <h3 class="text-xl font-bold text-gray-900">${car["Company Names"]} ${car["Cars Names"]}</h3>
           <p class="text-purple-600 font-semibold">${car["Cars Prices"] ? car['Cars Prices'].startsWith('$') ? car['Cars Prices'] : '$' + car['Cars Prices'] : 'N/A'}</p>
-          <p class="text-gray-600">Year: ${car.Year || 'Unknown'}</p>
+          <p class="text-gray-600">Engine: ${car.Engine || 'Unknown'}</p>
           <a href="/specs?id=${car.id}" class="mt-4 inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
             View Details
           </a>
@@ -216,8 +216,8 @@
 			filteredCars = query.trim() === '' ?
 				allCars.slice() :
 				fuzzySearchItems(allCars, query, {
-					key: item => `${item["Company Names"]} ${item["Cars Names"]}`,
-					threshold: 0.3,
+					key: item => `${item["Company Names"]} ${item["Cars Names"]} ${item["Engine"]}`,
+					threshold: 0.5,
 					ignoreSpaces: true
 				});
 
