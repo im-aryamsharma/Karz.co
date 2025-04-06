@@ -185,6 +185,42 @@ function renderCarDetails(car) {
 	});
 }
 
+function fetchCarDetails(carId) {
+	fetch(`${API_BASE}/get_car/${carId}`)
+		.then(response => {
+			if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+			return response.text();
+		})
+		.then(text => {
+			let cleanedText = text.replace(/NaN/g, "null");
+			const car = JSON.parse(cleanedText);
+			renderCarDetails(car);
+
+			fetchRecommendations(carId);
+		})
+		.catch(error => {
+			console.error("Error fetching car details:", error);
+			showError('Error loading specifications. Please try again later.');
+		});
+}
+
+
+function fetchRecommendations(carId) {
+	fetch(`/api/recommendations/${carId}`)
+	  .then(response => response.json())
+	  .then(data => {
+		const list = document.getElementById("recommendationsList");
+		if (list && data.recommendations.length > 0) {
+		  list.innerHTML = "";
+		  data.recommendations.forEach(rec => {
+			list.innerHTML += `<li>${rec}</li>`;
+		  });
+		}
+	  })
+	  .catch(err => {
+		console.error("Failed to load recommendations:", err);
+	});
+}
 function showError(message) {
 	const container = document.getElementById('carDetails') || document.createElement('div');
 	container.innerHTML = `

@@ -38,6 +38,15 @@
 		</div>
 	</div>
 
+	<!-- Recommendations Section -->
+	<div class="bg-white rounded-xl shadow-lg p-6 mt-8 lg:mt-0 lg:col-span-2">
+    	<h3 class="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">Recommended Cars</h3>
+    	<ul id="recommendationsList" class="list-disc list-inside text-gray-700 space-y-1">
+        	<li>Loading recommendations...</li>
+    	</ul>
+	</div>
+
+
 	<!-- Reviews Section -->
 	<div class="bg-white rounded-xl shadow-lg p-6 mt-8 lg:mt-0 lg:col-span-2">
 		<!-- Added lg:col-span-2 if placing in the right column of a 2/3 grid -->
@@ -253,6 +262,7 @@
 	if (id) {
 		fetchReviews(id);
 		checkAuthentication(id);
+		fetchRecommendations(id);
 	}
 </script>
 {% endblock %}

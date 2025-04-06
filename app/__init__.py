@@ -223,6 +223,24 @@ def view():
 def register():
 	return render_template("register.html", t="Sign In/Register")
 
+@app.route("/api/recommendations/<int:car_id>", methods=["GET"])
+def get_recommendations(car_id):
+    try:
+        df = pd.read_csv("app\Database\Cars_data_with_recommendations.csv")
+    except FileNotFoundError:
+        return jsonify({"error": "CSV file not found"}), 404
+
+    row = df[df["id"] == car_id]
+    if row.empty:
+        return jsonify({"error": "Car not found"}), 404
+
+    recommendations = row.iloc[0][["Recommendation 1", "Recommendation 2", "Recommendation 3","Recommendation 4", "Recommendation 5"]].dropna().tolist()
+
+    return jsonify({
+        "recommendations": recommendations
+    })
+
+
 if __name__ == '__main__':
 	app.config['TEMPLATES_AUTO_RELOAD'] = True
 	app.run(debug=True)
