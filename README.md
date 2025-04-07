@@ -14,7 +14,7 @@ A lightweight web-based forum built with Python (Flask) where users can register
 -  Simple, responsive web interface
 ---
 
-## ⚙️ Installation & Setup
+## Installation & Setup
 
 ### 1. Clone the repository
 
