@@ -32,7 +32,6 @@ cd app/
 flask --app __init__.py run
 ```
 OR
-EXAMPLE
 ```bash
 python3 __init__.py
 ```
