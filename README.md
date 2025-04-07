@@ -21,3 +21,6 @@ A lightweight web-based forum built with Python (Flask) where users can register
 ```bash
 git clone https://github.com/im-aryamsharma/Karz.co.git
 cd Karz.co
+```bash
+
+###
