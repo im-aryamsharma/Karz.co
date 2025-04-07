@@ -19,15 +19,15 @@ A lightweight web-based forum built with Python (Flask) where users can register
 ```bash
 git clone https://github.com/im-aryamsharma/Karz.co.git Karz.co
 ```
-####2. Install all the needed packages
+#### 2. Install all the needed packages
 ```bash
 pip3 install -r requirements.txt
 ```
-####3. Navigate to server directory:
+#### 3. Navigate to server directory:
 ```bash
 cd app/
 ```
-####4. Start the server:
+#### 4. Start the server:
 ```bash
 flask --app __init__.py run
 ```
