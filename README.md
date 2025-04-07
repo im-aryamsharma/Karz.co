@@ -19,5 +19,5 @@ A lightweight web-based forum built with Python (Flask) where users can register
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/car-forum.git
-cd car-forum
+git clone https://github.com/im-aryamsharma/Karz.co.git
+cd Karz.co
