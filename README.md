@@ -15,7 +15,7 @@ A lightweight web-based forum built with Python (Flask) where users can register
 ---
 
 ### Server deployment
-####1. Get the project itself
+#### 1. Get the project itself
 ```bash
 git clone https://github.com/im-aryamsharma/Karz.co.git Karz.co
 ```
